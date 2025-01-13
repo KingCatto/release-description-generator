@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Description Generator</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e1e1ff;
+            --primary-color: #4a6fa5;
+            --input-bg: #2d2d2d;
+            --input-border: #3d3d3d;
+            --button-primary: #4a6fa5;
+            --button-hover: #5c89c7;
+            --container-bg: rgba(26, 26, 26, 0.95);
+            --output-bg: #2d2d2d;
+        }
+
+        @keyframes space-float {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes twinkle-1 {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes twinkle-2 {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.2; }
+        }
+
+        @keyframes twinkle-3 {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.1; }
+        }
+
+        @keyframes nebula-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatPlanet1 {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(20px, 20px) rotate(180deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        @keyframes floatPlanet2 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-15px, 10px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes floatPlanet3 {
+            0% { transform: translate(0, 0); }
+            33% { transform: translate(15px, -15px); }
+            66% { transform: translate(-15px, 15px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes cloudMove {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--button-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-1px);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            width: 500px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .settings-content {
+            max-height: calc(90vh - 100px);
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .settings-panel textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-family: monospace;
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.4;
+        }
+
+        .settings-panel textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+        }
+
+        .release-name-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .release-name-container input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .split-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .input-section {
+            width: 400px;
+            min-width: 400px;
+        }
+
+        .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            margin-bottom: 10px;
+            font-family: monospace;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+
+        .generate-btn {
+            background-color: var(--button-primary);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--input-border);
+            transform: translateY(-1px);
+        }
+
+        .output {
+            background-color: var(--output-bg);
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            min-height: 550px;
+            max-height: 550px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border: 1px solid var(--input-border);
+            color: #d0d0d0;
+        }
+
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .star-1 {
+            width: 1px;
+            height: 1px;
+            animation: twinkle-1 3s infinite ease-in-out;
+        }
+
+        .star-2 {
+            width: 2px;
+            height: 2px;
+            animation: twinkle-2 4s infinite ease-in-out;
+        }
+
+        .star-3 {
+            width: 3px;
+            height: 3px;
+            animation: twinkle-3 5s infinite ease-in-out;
+        }
+
+        .planet {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .planet1 {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 20%),
+                        linear-gradient(45deg, #4B90DA, #27ae60, #4B90DA);
+            box-shadow: inset -15px -15px 40px rgba(0,0,0,0.4),
+                       0 0 30px rgba(75, 144, 218, 0.3);
+            position: absolute;
+            top: 15%;
+            right: 10%;
+            animation: floatPlanet1 30s infinite linear;
+        }
+
+        .planet2 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(rgba(255, 170, 100, 0.8) 20%,
+                                    rgba(200, 140, 90, 0.8) 30%,
+                                    rgba(255, 170, 100, 0.8) 40%,
+                                    rgba(200, 140, 90, 0.8) 50%,
+                                    rgba(255, 170, 100, 0.8) 60%,
+                                    rgba(200, 140, 90, 0.8) 70%,
+                                    rgba(255, 170, 100, 0.8) 80%);
+            box-shadow: inset -30px -30px 50px rgba(0,0,0,0.4),
+                       0 0 50px rgba(255, 170, 100, 0.3);
+            position: absolute;
+            bottom: 20%;
+            left: 5%;
+            animation: floatPlanet2 25s infinite ease-in-out;
+        }
+
+        .planet3 {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fff 0%, rgba(255, 255, 255, 0) 10%),
+                       linear-gradient(45deg, #c1440e, #d85a31 40%, #aa2e00);
+            box-shadow: inset -15px -15px 40px rgba(0,0,0,0.4),
+                       0 0 30px rgba(193, 68, 14, 0.3);
+            position: absolute;
+            top: 60%;
+            right: 25%;
+            animation: floatPlanet3 35s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="planet planet1"></div>
+    <div class="planet planet2"></div>
+    <div class="planet planet3"></div>
+    <div class="stars"></div>
+
+    <button onclick="toggleSettings()" class="settings-btn">⚙️ Settings</button>
+    
+    <div id="settingsOverlay" class="settings-overlay" style="display: none;" onclick="toggleSettings()"></div>
+    <div id="settingsPanel" class="settings-panel" style="display: none;">
+        <h2>Settings</h2>
+        <div class="settings-content">
+            <div class="form-group">
+                <label for="repackerName">Repacker Name:</label>
+                <input type="text" id="repackerName" placeholder="e.g., Morrenus Games">
+                
+                <label for="systemSpecs">System Specs:</label>
+                <input type="text" id="systemSpecs" placeholder="e.g., 16c/24t/32GB RAM">
+                
+                <label for="requiredRam">Required RAM:</label>
+                <input type="text" id="requiredRam" placeholder="e.g., 4 GB">
+                
+                <label for="testedOS">Tested OS:</label>
+                <input type="text" id="testedOS" placeholder="e.g., Windows 10/11">
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeLossless" checked>
+                    Include "100% Lossless & MD5 Perfect" line
+                </label>
+
+                <label for="customNotes">Optional Notes (will appear after main description):</label>
+                <textarea id="customNotes" placeholder="Enter any additional notes you want to appear in your release" rows="4"></textarea>
+            </div>
+            <button onclick="saveSettings()" class="generate-btn">Save Settings</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>🎮 Release Description Generator</h1>        
+        <div class="split-container">
+    <div class="input-section">
+        <div class="form-group">
+            <label for="imagelink">Cover Image Link:</label>
+            <input type="text" id="imagelink" placeholder="https://example.com/image.jpg">
+
+            <label for="gamename">Game Name:</label>
+            <input type="text" id="gamename" required>
+            
+            <label for="buildnumber">Build Number:</label>
+            <input type="text" id="buildnumber">
+
+            <label for="releasename">Release Name:</label>
+            <div class="release-name-container">
+                <input type="text" id="releasename" readonly>
+                <button onclick="generateReleaseName()" class="generate-btn" style="width: auto; margin-left: 10px; padding: 8px 15px;">Generate Name</button>
+            </div>
+            
+            <label for="crack">Crack Type:</label>
+            <input type="text" id="crack" placeholder="e.g., CODEX, PLAZA">
+            
+            <label for="originalsize">Original Game Size:</label>
+            <input type="text" id="originalsize" placeholder="e.g., 45.2 GB">
+            
+            <label for="repacksize">Repack Size:</label>
+            <input type="text" id="repacksize" placeholder="e.g., 28.4 GB">
+            
+            <label for="installtime">Install Time:</label>
+            <input type="text" id="installtime" placeholder="e.g., ~15 mins">
+            
+            <label for="languages">Languages (comma separated):</label>
+            <input type="text" id="languages" placeholder="e.g., English, French, German">
+
+            <label for="downloadlink">Download Link:</label>
+            <input type="text" id="downloadlink">
+        </div>
+        
+        <button onclick="generateDescription()" class="generate-btn">Generate Description</button>
+    </div>
+    
+    <div class="output-section">
+        <h2>Preview</h2>
+        <div id="output" class="output"></div>
+        <button id="copyBtn" onclick="copyToClipboard()" class="copy-btn">Copy to Clipboard</button>
+    </div>
+    </div>
+    </div>
+
+<script>
+const defaultSettings = {
+    repackerName: 'Morrenus Games',
+    systemSpecs: '16c/24t/32GB RAM',
+    requiredRam: '4 GB',
+    testedOS: 'Windows 10/11',
+    customNotes: '',
+    includeLossless: true
+};
+
+function loadSettings() {
+    const savedSettings = localStorage.getItem('repackerSettings');
+    if (savedSettings) {
+        return JSON.parse(savedSettings);
+    }
+    return defaultSettings;
+}
+
+function saveSettings() {
+    const settings = {
+        repackerName: document.getElementById('repackerName').value || defaultSettings.repackerName,
+        systemSpecs: document.getElementById('systemSpecs').value || defaultSettings.systemSpecs,
+        requiredRam: document.getElementById('requiredRam').value || defaultSettings.requiredRam,
+        testedOS: document.getElementById('testedOS').value || defaultSettings.testedOS,
+        customNotes: document.getElementById('customNotes').value,
+        includeLossless: document.getElementById('includeLossless').checked
+    };
+    
+    localStorage.setItem('repackerSettings', JSON.stringify(settings));
+    toggleSettings();
+    alert('Settings saved!');
+}
+
+function toggleSettings() {
+    const panel = document.getElementById('settingsPanel');
+    const overlay = document.getElementById('settingsOverlay');
+    if (panel.style.display === 'none') {
+        const settings = loadSettings();
+        document.getElementById('repackerName').value = settings.repackerName;
+        document.getElementById('systemSpecs').value = settings.systemSpecs;
+        document.getElementById('requiredRam').value = settings.requiredRam;
+        document.getElementById('testedOS').value = settings.testedOS;
+        document.getElementById('customNotes').value = settings.customNotes || '';
+        document.getElementById('includeLossless').checked = settings.includeLossless;
+        panel.style.display = 'block';
+        overlay.style.display = 'block';
+    } else {
+        panel.style.display = 'none';
+        overlay.style.display = 'none';
+    }
+}
+
+function generateDescription() {
+    const settings = loadSettings();
+    const imagelink = document.getElementById('imagelink').value;
+    const gamename = document.getElementById('gamename').value;
+    const buildnumber = document.getElementById('buildnumber').value;
+    const crack = document.getElementById('crack').value;
+    const originalsize = document.getElementById('originalsize').value;
+    const repacksize = document.getElementById('repacksize').value;
+    const installtime = document.getElementById('installtime').value;
+    const languages = document.getElementById('languages').value;
+    const downloadlink = document.getElementById('downloadlink').value;
+
+    let description = `[quote][b][color=#0080FF]${settings.repackerName} Present's[/color][/b]
+[img]${imagelink}[/img]
+
+[b]Based on[/b] ${gamename} (${buildnumber})
+[b]Crack:[/b] [color=#ff0000]${crack}[/color]`;
+
+    if (settings.includeLossless) {
+        description += `\n\n[b]100% Lossless & MD5 Perfect[/b]: all files are identical to originals after installation`;
+    }
+
+    description += `\n\n[b]Languages[/b]: ${languages}
+
+[b]Repack Information[/b]
+[list]
+[*]Original Size: ${originalsize}
+[*]Repack Size: ${repacksize}
+[*]Installation time: ${installtime} on ${settings.systemSpecs}
+[*]RAM required: [b]${settings.requiredRam}[/b] during installation
+[/list]
+
+[b]Note:[/b] Only tested on ${settings.testedOS}`;
+
+    if (settings.customNotes) {
+        description += `\n\n[b]Additional Notes:[/b]\n${settings.customNotes}`;
+    }
+
+    description += `\n\n[size=150][url=${downloadlink}][color=#00ff00]Download Now[/color][/url][/size][/quote]`;
+
+    document.getElementById('output').textContent = description;
+}
+
+function generateReleaseName() {
+    const settings = loadSettings();
+    const gameName = document.getElementById('gamename').value;
+    const buildNumber = document.getElementById('buildnumber').value;
+    
+    if (!gameName) {
+        alert('Please enter a game name first');
+        return;
+    }
+
+    const cleanGameName = gameName
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .replace(/\s+/g, '.')
+        .replace(/\.+/g, '.');
+
+    let releaseName = cleanGameName;
+    
+    if (buildNumber) {
+        releaseName += `.Build.${buildNumber}`;
+    }
+    
+    releaseName += `.${settings.repackerName.replace(/\s+/g, '')}`;
+
+    document.getElementById('releasename').value = releaseName;
+}
+
+function copyToClipboard() {
+    const output = document.getElementById('output');
+    const text = output.textContent;
+    
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        const copyBtn = document.getElementById('copyBtn');
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+            copyBtn.textContent = 'Copy to Clipboard';
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+    } finally {
+        document.body.removeChild(textArea);
+    }
+}
+
+function createStars() {
+    const starsContainer = document.querySelector('.stars');
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        const size = Math.random();
+        const sizeClass = size < 0.3 ? 'star-1' : size < 0.7 ? 'star-2' : 'star-3';
+        star.className = `star ${sizeClass}`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        starsContainer.appendChild(star);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    createStars();
+    const settings = loadSettings();
+    if (document.getElementById('repackerName')) {
+        document.getElementById('repackerName').value = settings.repackerName;
+        document.getElementById('systemSpecs').value = settings.systemSpecs;
+        document.getElementById('requiredRam').value = settings.requiredRam;
+        document.getElementById('testedOS').value = settings.testedOS;
+        document.getElementById('customNotes').value = settings.customNotes || '';
+        document.getElementById('includeLossless').checked = settings.includeLossless;
+    }
+});
+</script>
+</body>
+</html>
