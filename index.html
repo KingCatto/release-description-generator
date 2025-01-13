@@ -704,7 +704,7 @@
                 
                 // Add version/build number
                 if (buildNumber) {
-                    releaseName += `.${isBuild ? buildNumber : 'v' + buildNumber}`;
+                    releaseName += `.${isBuild ? 'B' : 'v'}${buildNumber}`;
                 }
 
                 // Count languages and add MULTi if present
