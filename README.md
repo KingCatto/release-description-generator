@@ -36,6 +36,7 @@ No installation is required. Simply open the `release-generator.html` file in an
 ## Contribution
 Contributions to improve functionality, styling, or additional features are welcome. Please fork the repository, make your changes, and submit a pull request.
 
+If you encounter any issues or have questions, feel free to join our support community on Discord: https://discord.gg/ByCS43XMve.
 ---
 
 ### Notes
