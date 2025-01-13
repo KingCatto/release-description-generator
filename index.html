@@ -699,7 +699,7 @@
             if (settings.includeHeader) {
                 description += useMarkdown ?
                     `**${settings.repackerName} Presents**\n` :
-                    `[b][color=#0080FF]${settings.repackerName} Present's[/color][/b]\n`;
+                    `[b][color=#0080FF]${settings.repackerName} Presents[/color][/b]\n`;
             }
             if (imagelink) {
                 description += useMarkdown ?
@@ -747,8 +747,8 @@
                 if (originalsize) description += useMarkdown ? `• Original Size: **${originalsize}**\n` :
                     `\n[*]Original Size: [b]${originalsize}[/b]`;
                 if (installtime) description += useMarkdown ?
-                    `• **Installation Time: ${installtime}** on **${settings.systemSpecs}**\n` :
-                    `\n[*][b]Installation time: ${installtime}[/b] on ${settings.systemSpecs}`;
+                    `• Installation Time: **${installtime}** on **${settings.systemSpecs}**\n` :
+                    `\n[*]Installation time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]`;
                 if (settings.requiredRam) description += useMarkdown ?
                     `• RAM Required: **${settings.requiredRam}** during installation.` :
                     `\n[*]RAM required: [b]${settings.requiredRam}[/b] during installation`;
