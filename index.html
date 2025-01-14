@@ -504,6 +504,14 @@
                 <label for="greetings">GREETINGS TO:</label>
                 <input type="text" id="greetings" placeholder="e.g., Razor12911, Cesar82, DODI">
 
+                <label for="customNotes">Optional Notes (will appear after main description):</label>
+                <textarea id="customNotes" placeholder="Enter any additional notes you want to appear in your release" rows="4"></textarea>
+
+                <label class="checkbox-label">
+                    <input type="checkbox" id="listAllLanguages" checked>
+                    List all languages (unchecked for MULTi format)
+                </label>
+
                 <label class="checkbox-label">
                     <input type="checkbox" id="includeGreetings" checked>
                     Include Greetings section
@@ -518,9 +526,6 @@
                     <input type="checkbox" id="useKaOsFormat">
                     Use KaOs Release Name Format
                 </label>
-
-                <label for="customNotes">Optional Notes (will appear after main description):</label>
-                <textarea id="customNotes" placeholder="Enter any additional notes you want to appear in your release" rows="4"></textarea>
             </div>
             <button onclick="saveSettings()" class="generate-btn">Save Settings</button>
         </div>
@@ -672,7 +677,8 @@
                 greetings: document.getElementById('greetings').value || defaultSettings.greetings,
                 includeGreetings: document.getElementById('includeGreetings').checked,
                 useKaOsFormat: document.getElementById('useKaOsFormat').checked,
-                outputFormat: document.getElementById('outputFormat').value
+                outputFormat: document.getElementById('outputFormat').value,
+                listAllLanguages: document.getElementById('listAllLanguages').checked
             };
             
             localStorage.setItem('repackerSettings', JSON.stringify(settings));
@@ -720,9 +726,10 @@
             const originalsize = document.getElementById('originalsize').value;
             const repacksize = document.getElementById('repacksize').value;
             const installtime = document.getElementById('installtime').value;
-            const languages = document.getElementById('languages').value;
             const downloadlink = document.getElementById('downloadlink').value;
             const isBuildNumber = document.getElementById('isBuildNumber').checked;
+            const languages = document.getElementById('languages').value;
+            const listAllLanguages = settings.listAllLanguages;
 
             let description = format === 'bbcode' ? '[quote]' : '';
             
@@ -782,10 +789,17 @@
             }
 
             if (languages) {
-                description += format === 'bbcode' ? `\n\n[b]Languages[/b]: ${languages}` :
-                             format === 'discord' ? `\n\n**Languages**: ${languages}` :
-                             `\n\nLanguages: ${languages}`;
-            }
+        if (listAllLanguages) {
+            description += format === 'bbcode' ? `\n\n[b]Languages[/b]: ${languages}` :
+                         format === 'discord' ? `\n\n**Languages**: ${languages}` :
+                         `\n\nLanguages: ${languages}`;
+        } else {
+            const langCount = languages.split(',').length;
+            description += format === 'bbcode' ? `\n\n[b]Languages[/b]: MULTi${langCount}` :
+                         format === 'discord' ? `\n\n**Languages**: MULTi${langCount}` :
+                         `\n\nLanguages: MULTi${langCount}`;
+        }
+    }
 
             if (originalsize || repacksize || installtime) {
                 description += format === 'bbcode' ? `\n\n[b]Repack Information[/b]\n[list]` :
@@ -801,12 +815,12 @@
                                                `\nOriginal Size: ${originalsize}`;
 
                 if (installtime) description += format === 'bbcode' ? `\n[*]Installation time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]` :
-                                              format === 'discord' ? `\n• Installation time: **${installtime}** on **${settings.systemSpecs}**` :
-                                              `\nInstallation time: ${installtime} on ${settings.systemSpecs}`;
+                    format === 'discord' ? `\n• Installation time: **${installtime}** on **${settings.systemSpecs}**` :
+                    `\nInstallation time: ${installtime} on ${settings.systemSpecs}`;
 
                 if (settings.requiredRam) description += format === 'bbcode' ? `\n[*]RAM required: [b]${settings.requiredRam}[/b] during installation` :
-                                                       format === 'discord' ? `\n• RAM required: **${settings.requiredRam}** during installation` :
-                                                       `\nRAM required: ${settings.requiredRam} during installation`;
+                    format === 'discord' ? `\n• RAM required: **${settings.requiredRam}** during installation` :
+                    `\nRAM required: ${settings.requiredRam} during installation`;
 
                 if (format === 'bbcode') description += '\n[/list]';
             }
@@ -961,6 +975,7 @@
             const settings = loadSettings();
             if (document.getElementById('repackerName')) {
                 document.getElementById('repackerName').value = settings.repackerName;
+            }
                 document.getElementById('systemSpecs').value = settings.systemSpecs;
                 document.getElementById('requiredRam').value = settings.requiredRam;
                 document.getElementById('customNotes').value = settings.customNotes || '';
@@ -972,9 +987,12 @@
                 document.getElementById('includeGreetings').checked = settings.includeGreetings;
                 document.getElementById('useKaOsFormat').checked = settings.useKaOsFormat;
                 document.getElementById('outputFormat').value = settings.outputFormat;
+            if (document.getElementById('listAllLanguages')) {
+                document.getElementById('listAllLanguages').checked = settings.listAllLanguages;
+                }    
                 updateToggleLabel();
             }
-        });
+        );
     </script>
 </body>
 </html>
