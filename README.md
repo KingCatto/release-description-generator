@@ -53,7 +53,9 @@ The **Release Description Generator** is a web-based tool designed to streamline
    - Copy or download as needed
 
 ## Installation
-No installation required. Open `release-generator.html` in any modern web browser to use the tool.
+- You can either: - Use the online version at https://kingcatto.github.io/release-description-generator/
+- Download and open `release-generator.html` in any modern web browser 
+
 
 ## Technology Stack
 - **HTML5**: Structure and layout
