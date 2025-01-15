@@ -202,6 +202,10 @@
             transition: all 0.3s ease;
         }
 
+        .import-btn {
+            right: 140px;
+        }
+
         .settings-btn:hover {
             background: var(--button-hover);
             transform: translateY(-1px);
@@ -531,6 +535,67 @@
             color: var(--text-color);
             user-select: none;
         }
+
+        .upload-section {
+            margin-top: 20px;
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .separator span {
+            padding: 0 10px;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 2px dashed var(--input-border);
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary-color);
+            background: rgba(74, 111, 165, 0.1);
+        }
+
+        .file-upload-label input {
+            display: none;
+        }
+
+        .nav-btn {
+            position: relative;
+            /* Override absolute positioning */
+            margin-left: 10px;
+            /* Add spacing between buttons */
+        }
+
+        /* Create a button container to hold all buttons */
+        .button-container {
+            position: static;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
     </style>
 </head>
 
@@ -539,9 +604,17 @@
     <div class="planet planet2"></div>
     <div class="planet planet3"></div>
     <div class="stars"></div>
+    <div class="button-container">
+        <button onclick="toggleSettings()" class="settings-btn">⚙️ Settings</button>
+        <button onclick="toggleImport()" class="settings-btn import-btn">📥 Import</button>
+        <button onclick="window.open('https://kingcatto.github.io/CS.RIN.RU-Info-combiner/', '_blank')"
+            class="settings-btn nav-btn">📋 CS.rin.ru Info Combiner</button>
+        <button onclick="window.open('https://kingcatto.github.io/steam-manifest-hash-checker-HTML/', '_blank')"
+            class="settings-btn nav-btn">🔍 Steam Manifest Hash Checker</button>
+        <button onclick="window.open('https://github.com/KingCatto/Super-Steam-Packer-Queue-Creator/', '_blank')"
+            class="settings-btn nav-btn">🚀 Super Steam Packer Queue Creator</button>
 
-    <button onclick="toggleSettings()" class="settings-btn">⚙️ Settings</button>
-
+    </div>
     <div id="settingsOverlay" class="settings-overlay" style="display: none;" onclick="toggleSettings()"></div>
     <div id="settingsPanel" class="settings-panel" style="display: none;">
         <h2>Settings</h2>
@@ -549,8 +622,6 @@
             <div class="form-group">
                 <label for="repackerName">Repacker Name:</label>
                 <input type="text" id="repackerName" placeholder="e.g., Morrenus Games">
-
-
 
                 <label for="systemSpecs">System Specs:</label>
                 <input type="text" id="systemSpecs" placeholder="e.g., 16c/24t/32GB RAM">
@@ -607,13 +678,33 @@
         </div>
     </div>
 
+    <div id="importOverlay" class="settings-overlay" style="display: none;" onclick="toggleImport()"></div>
+    <div id="importPanel" class="settings-panel" style="display: none;">
+        <h2>Import Release Text</h2>
+        <div class="settings-content">
+            <label for="importText">Paste your release text here:</label>
+            <textarea id="importText"
+                placeholder="Paste your BBCode, Discord, or Plain text release description here..."
+                rows="10"></textarea>
+            <div class="upload-section">
+                <div class="separator">
+                    <span>OR</span>
+                </div>
+                <label for="fileUpload" class="file-upload-label">
+                    <span>Choose a file</span>
+                    <input type="file" id="fileUpload" accept=".txt" onChange="handleFileUpload(event)">
+                </label>
+            </div>
+            <button onclick="importReleaseText()" class="generate-btn">Import</button>
+        </div>
+    </div>
+
     <div class="container">
         <h1>🎮 Release Description Generator</h1>
 
         <div class="split-container">
             <div class="input-section">
                 <div class="form-group">
-
                     <label for="imagelink">Cover Image Link:</label>
                     <input type="text" id="imagelink" placeholder="https://example.com/image.jpg">
 
@@ -676,9 +767,8 @@
 
                 <button onclick="generateDescription()" class="generate-btn">Generate Description</button>
             </div>
-
             <div class="output-section">
-                <h2>Preview</h2>
+                <h2>Output</h2>
                 <div id="output" class="output"></div>
                 <div class="button-group">
                     <button id="copyBtn" onclick="copyToClipboard()" class="copy-btn">Copy to Clipboard</button>
@@ -725,7 +815,6 @@
                         .replace(/\[\/list\]/g, '')
                         .replace(/\[img\](.*?)\[\/img\]/g, '![]($1)')
                         .replace(/\[\*\]/g, '• ');
-
                 case 'plaintext':
                     return text
                         .replace(
@@ -733,10 +822,85 @@
                             '')
                         .replace(/\[img\](.*?)\[\/img\]/g, 'Image: $1')
                         .replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '$2 ($1)');
-
                 default: // BBCode
                     return text;
             }
+        }
+
+        function parseReleaseText(text) {
+            const fields = {
+                gamename: '',
+                buildnumber: '',
+                releaseDate: '',
+                genre: '',
+                developer: '',
+                publisher: '',
+                store: '',
+                crack: '',
+                originalsize: '',
+                repacksize: '',
+                installtime: '',
+                languages: '',
+                imagelink: '',
+                downloadlink: ''
+            };
+
+            // Extract image link
+            const imgMatch = text.match(/\[img\](.*?)\[\/img\]/);
+            if (imgMatch) fields.imagelink = imgMatch[1];
+
+            // Extract based on information
+            const basedOnMatch = text.match(/Based on:?\s*(.*?)(?:\(([^\)]+)\))?\n/i);
+            if (basedOnMatch) {
+                fields.gamename = basedOnMatch[1].trim();
+                if (basedOnMatch[2]) {
+                    const version = basedOnMatch[2].trim();
+                    if (version.startsWith('B')) {
+                        fields.buildnumber = version.substring(1);
+                        document.getElementById('isBuildNumber').checked = true;
+                    } else if (version.startsWith('v')) {
+                        fields.buildnumber = version.substring(1);
+                        document.getElementById('isBuildNumber').checked = false;
+                    }
+                }
+            }
+
+            // Extract other fields using regex patterns
+            const patterns = {
+                releaseDate: /Release Date:?\s*(.*?)\n/i,
+                genre: /Genre:?\s*(.*?)\n/i,
+                developer: /Developer:?\s*(.*?)\n/i,
+                publisher: /Publisher:?\s*(.*?)\n/i,
+                store: /Store:?\s*(?:\[url\])?(.*?)(?:\[\/url\])?\n/i, // Modified to handle both BBCode and plain URLs
+                crack: /Crack:?\s*(.*?)(?:\n|$)/i,
+                languages: /Languages:?\s*(.*?)(?:\n|$)/i,
+                originalsize: /Original Size:?\s*(.*?)\n/i,
+                repacksize: /Repack Size:?\s*(.*?)\n/i,
+                installtime: /Installation time:?\s*(.*?)(?=\s*on\s|$)/i,
+            };
+
+            // Extract fields using patterns
+            Object.entries(patterns).forEach(([field, pattern]) => {
+                const match = text.match(pattern);
+                if (match) fields[field] = match[1].trim();
+            });
+
+            // Handle download link specifically (could be in different formats)
+            const downloadPatterns = [
+                /\[url=(.*?)\].*?\[\/url\]/, // BBCode with custom text
+                /\[url\](.*?)\[\/url\]/, // Simple BBCode
+                /Download:?\s*(https?:\/\/\S+)/i // Plain text
+            ];
+
+            for (const pattern of downloadPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    fields.downloadlink = match[1];
+                    break;
+                }
+            }
+
+            return fields;
         }
 
         function loadSettings() {
@@ -773,10 +937,9 @@
         function toggleSettings() {
             const panel = document.getElementById('settingsPanel');
             const overlay = document.getElementById('settingsOverlay');
-            const settings = loadSettings(); // Load saved settings
+            const settings = loadSettings();
 
             if (panel.style.display === 'none') {
-                // Load and apply settings to UI elements
                 document.getElementById('repackerName').value = settings.repackerName;
                 document.getElementById('systemSpecs').value = settings.systemSpecs;
                 document.getElementById('requiredRam').value = settings.requiredRam;
@@ -790,21 +953,50 @@
                 document.getElementById('useKaOsFormat').checked = settings.useKaOsFormat;
                 document.getElementById('outputFormat').value = settings.outputFormat;
                 document.getElementById('listAllLanguages').checked = settings.listAllLanguages;
-
-                // Set the Build/Version toggle based on saved settings
                 document.getElementById('isBuildNumber').checked = settings.isBuild;
-                updateToggleLabel(); // Update the toggle label
-
-                // Show the settings panel
+                updateToggleLabel();
                 panel.style.display = 'block';
                 overlay.style.display = 'block';
             } else {
-                // Hide the settings panel
                 panel.style.display = 'none';
                 overlay.style.display = 'none';
             }
         }
 
+        function toggleImport() {
+            const panel = document.getElementById('importPanel');
+            const overlay = document.getElementById('importOverlay');
+
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                overlay.style.display = 'block';
+                document.getElementById('importText').value = '';
+            } else {
+                panel.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+        }
+
+        function importReleaseText() {
+            const importTextArea = document.getElementById('importText');
+            const text = importTextArea.value;
+
+            if (!text) {
+                alert('Please paste a release text to import.');
+                return;
+            }
+
+            const fields = parseReleaseText(text);
+
+            Object.entries(fields).forEach(([field, value]) => {
+                const element = document.getElementById(field);
+                if (element) element.value = value;
+            });
+
+            generateReleaseName();
+            toggleImport();
+            generateDescription();
+        }
 
         function generateDescription() {
             const settings = loadSettings();
@@ -885,42 +1077,69 @@
             }
 
             if (languages) {
-                if (listAllLanguages) {
+                if (languages.includes('MULTi') || !listAllLanguages) {
+                    // If it's already in MULTi format or user wants MULTi format, use as is
                     description += format === 'bbcode' ? `\n\n[b]Languages[/b]: ${languages}` :
                         format === 'discord' ? `\n\n**Languages**: ${languages}` :
                         `\n\nLanguages: ${languages}`;
                 } else {
+                    // Only count and convert to MULTi format if it's not already MULTi
                     const langCount = languages.split(',').length;
                     description += format === 'bbcode' ? `\n\n[b]Languages[/b]: MULTi${langCount}` :
                         format === 'discord' ? `\n\n**Languages**: MULTi${langCount}` :
                         `\n\nLanguages: MULTi${langCount}`;
                 }
             }
-
             if (originalsize || repacksize || installtime) {
                 description += format === 'bbcode' ? `\n\n[b]Repack Information[/b]\n[list]` :
                     format === 'discord' ? `\n\n**Repack Information**` :
                     `\n\nRepack Information`;
 
-                if (repacksize) description += format === 'bbcode' ? `\n[*]Repack Size: ${repacksize}` :
-                    format === 'discord' ? `\n• Repack Size: ${repacksize}` :
-                    `\nRepack Size: ${repacksize}`;
+                const listItems = [];
 
-                if (originalsize) description += format === 'bbcode' ? `\n[*]Original Size: ${originalsize}` :
-                    format === 'discord' ? `\n• Original Size: ${originalsize}` :
-                    `\nOriginal Size: ${originalsize}`;
+                if (repacksize) {
+                    listItems.push(format === 'bbcode' ? `Repack Size: ${repacksize}` :
+                        format === 'discord' ? `Repack Size: ${repacksize}` :
+                        `Repack Size: ${repacksize}`);
+                }
 
-                if (installtime) description += format === 'bbcode' ?
-                    `\n[*]Installation time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]` :
-                    format === 'discord' ? `\n• Installation time: **${installtime}** on **${settings.systemSpecs}**` :
-                    `\nInstallation time: ${installtime} on ${settings.systemSpecs}`;
+                if (originalsize) {
+                    listItems.push(format === 'bbcode' ? `Original Size: ${originalsize}` :
+                        format === 'discord' ? `Original Size: ${originalsize}` :
+                        `Original Size: ${originalsize}`);
+                }
 
-                if (settings.requiredRam) description += format === 'bbcode' ?
-                    `\n[*]RAM required: [b]${settings.requiredRam}[/b] during installation` :
-                    format === 'discord' ? `\n• RAM required: **${settings.requiredRam}** during installation` :
-                    `\nRAM required: ${settings.requiredRam} during installation`;
+                if (installtime) {
+                    listItems.push(format === 'bbcode' ?
+                        `Installation time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]` :
+                        format === 'discord' ?
+                        `Installation time: **${installtime}** on **${settings.systemSpecs}**` :
+                        `Installation time: ${installtime} on ${settings.systemSpecs}`);
+                }
 
-                if (format === 'bbcode') description += '\n[/list]';
+                if (settings.requiredRam) {
+                    listItems.push(format === 'bbcode' ?
+                        `RAM required: [b]${settings.requiredRam}[/b] during installation` :
+                        format === 'discord' ?
+                        `RAM required: **${settings.requiredRam}** during installation` :
+                        `RAM required: ${settings.requiredRam} during installation`);
+                }
+
+                // Add list items with proper formatting
+                if (format === 'bbcode') {
+                    listItems.forEach(item => {
+                        description += `\n[*]${item}`;
+                    });
+                    description += '\n[/list]';
+                } else if (format === 'discord') {
+                    listItems.forEach(item => {
+                        description += `\n• ${item}`;
+                    });
+                } else {
+                    listItems.forEach(item => {
+                        description += `\n- ${item}`;
+                    });
+                }
             }
 
             if (settings.repackBy) {
@@ -949,7 +1168,6 @@
             }
 
             if (format === 'bbcode') description += '[/quote]';
-
             document.getElementById('output').textContent = description;
         }
 
@@ -969,16 +1187,13 @@
             let releaseName = '';
 
             if (isKaOs) {
-                // KaOs format
                 const cleanGameName = gameName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '.');
                 releaseName = cleanGameName;
 
-                // Add version/build number
                 if (buildNumber) {
                     releaseName += `.${isBuild ? 'B' + buildNumber : 'v' + buildNumber}`;
                 }
 
-                // Count languages and add MULTi if present
                 if (languages) {
                     const langCount = languages.split(',').length;
                     if (langCount > 1) {
@@ -988,7 +1203,6 @@
 
                 releaseName += '.REPACK-KaOs';
             } else {
-                // Original format
                 const cleanGameName = gameName
                     .replace(/[^a-zA-Z0-9\s]/g, '')
                     .replace(/\s+/g, '.')
@@ -1030,30 +1244,38 @@
                 document.body.removeChild(textArea);
             }
         }
+
         function downloadDescription() {
-    const output = document.getElementById('output');
-    const text = output.textContent;
-    const releaseName = document.getElementById('releasename').value || 'release_description';
-    const format = document.getElementById('outputFormat').value;
-    
-    // Add appropriate file extension based on format
-    const fileExtension = format === 'bbcode' ? '.bbcode.txt' : 
-                         format === 'discord' ? '.discord.txt' : '.Plain.txt';
+            const output = document.getElementById('output');
+            const text = output.textContent;
+            const releaseName = document.getElementById('releasename').value || 'release_description';
+            const format = document.getElementById('outputFormat').value;
 
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+            // Add appropriate file extension based on format
+            const fileExtension = format === 'bbcode' ? '.bbcode.txt' :
+                format === 'discord' ? '.discord.txt' : '.Plain.txt';
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${releaseName}${fileExtension}`;
+            const blob = new Blob([text], {
+                type: 'text/plain'
+            });
+            const url = URL.createObjectURL(blob);
 
-    document.body.appendChild(link);
-    link.click();
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${releaseName}${fileExtension}`;
 
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
+            document.body.appendChild(link);
+            link.click();
 
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function updateToggleLabel() {
+            const isBuild = document.getElementById('isBuildNumber').checked;
+            const toggleText = document.getElementById('toggleText');
+            toggleText.textContent = isBuild ? 'Build' : 'Version';
+        }
 
         function createStars() {
             const starsContainer = document.querySelector('.stars');
@@ -1069,10 +1291,20 @@
             }
         }
 
-        function updateToggleLabel() {
-            const isBuild = document.getElementById('isBuildNumber').checked;
-            const toggleText = document.getElementById('toggleText');
-            toggleText.textContent = isBuild ? 'Build' : 'Version';
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('importText').value = e.target.result;
+                // Clear the file input for future use
+                event.target.value = '';
+            };
+            reader.onerror = function () {
+                alert('Error reading file');
+            };
+            reader.readAsText(file);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1097,6 +1329,11 @@
                 document.getElementById('listAllLanguages').checked = settings.listAllLanguages;
             }
             updateToggleLabel();
+        });
+
+        // Add event listener for format changes
+        document.getElementById('outputFormat').addEventListener('change', () => {
+            generateDescription();
         });
     </script>
 </body>
