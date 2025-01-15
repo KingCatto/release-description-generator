@@ -845,9 +845,9 @@
 
             if (gamename) {
                 const version = buildnumber ? (isBuildNumber ? `B${buildnumber}` : `v${buildnumber}`) : '';
-                description += format === 'bbcode' ? `[b]Based on[/b] ${gamename}${version ? ` (${version})` : ''}\n` :
-                    format === 'discord' ? `**Based on** ${gamename}${version ? ` (${version})` : ''}\n` :
-                    `Based on ${gamename}${version ? ` (${version})` : ''}\n`;
+                description += format === 'bbcode' ? `[b]Based on:[/b] ${gamename}${version ? ` (${version})` : ''}\n` :
+                    format === 'discord' ? `**Based on:** ${gamename}${version ? ` (${version})` : ''}\n` :
+                    `Based on: ${gamename}${version ? ` (${version})` : ''}\n`;
             }
 
             if (releaseDate) description += format === 'bbcode' ? `[b]Release Date:[/b] ${releaseDate}\n` :
@@ -1030,27 +1030,29 @@
                 document.body.removeChild(textArea);
             }
         }
-
         function downloadDescription() {
-            const output = document.getElementById('output');
-            const text = output.textContent;
-            const releaseName = document.getElementById('releasename').value || 'release_description';
+    const output = document.getElementById('output');
+    const text = output.textContent;
+    const releaseName = document.getElementById('releasename').value || 'release_description';
+    const format = document.getElementById('outputFormat').value;
+    
+    // Add appropriate file extension based on format
+    const fileExtension = format === 'bbcode' ? '.bbcode.txt' : 
+                         format === 'discord' ? '.discord.txt' : '.Plain.txt';
 
-            const blob = new Blob([text], {
-                type: 'text/plain'
-            });
-            const url = URL.createObjectURL(blob);
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${releaseName}.txt`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${releaseName}${fileExtension}`;
 
-            document.body.appendChild(link);
-            link.click();
+    document.body.appendChild(link);
+    link.click();
 
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
 
 
         function createStars() {
