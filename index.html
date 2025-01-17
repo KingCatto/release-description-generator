@@ -1785,10 +1785,6 @@
             description += `\n\nREPACK BY: ${settings.repackBy}`;
         }
 
-        if (settings.website) {
-            description += `\n\nWEBSITE: ${settings.website}`;
-        }
-
         if (settings.includeGreetings && settings.greetings) {
             description += `\n\nGREETINGS TO: ${settings.greetings}`;
         }
@@ -1805,12 +1801,15 @@
                 `\n\n**IF YOU LIKE THIS GAME PLEASE SUPPORT THE DEVELOPERS & BUY IT!**` :
                 `\n\nIF YOU LIKE THIS GAME PLEASE SUPPORT THE DEVELOPERS & BUY IT!`;
         }
+        if (settings.website) {
+            description += `\n\nWEBSITE: ${settings.website}`;
+        }
 
         if (downloadlink) {
             description += format === 'bbcode' ?
                 `\n\n[size=150][url=${downloadlink}][color=#00ff00]Download Now[/color][/url][/size]` :
                 format === 'discord' ? `\n\n[Download Now](${downloadlink})` :
-                `\n\nDownload: ${downloadlink}`;
+                `\n\nDownload ${downloadlink}`;
         }
 
         if (format === 'bbcode') description += '[/quote]';
