@@ -1619,8 +1619,6 @@
         const importTextArea = document.getElementById('importText');
         const text = importTextArea.value;
 
-        checkForBarrelRoll(text);
-
         if (!text) {
             showToast('Please paste a release text to import', 'error');
             return;
@@ -1867,7 +1865,6 @@
         }
 
         document.getElementById('releasename').value = releaseName;
-        checkForBarrelRoll(description);
         showToast('Release name generated!');
     }
 
@@ -2213,26 +2210,6 @@
     }
     // Initialize the nuke function
     const triggerNuke = initNuke();
-
-    function createStarField() {
-        // Remove any existing stars
-        document.querySelectorAll('.star').forEach(star => star.remove());
-
-        // Create 200 stars
-        for (let i = 0; i < 200; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-
-            // Randomize starting position
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-
-            // Randomize animation duration between 0.5 and 2 seconds
-            star.style.animationDuration = `${0.5 + Math.random() * 1.5}s`;
-
-            document.body.appendChild(star);
-        }
-    }
 
     function initEasterEggs() {
         const triggers = {
