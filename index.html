@@ -1223,7 +1223,8 @@
             transform: translate(-50%, -50%);
             animation: shockwave 2s cubic-bezier(0.1, 0.5, 0.1, 1) forwards;
         }
-    </style>
+
+</style>
 </head>
 
 <body>
@@ -2035,33 +2036,34 @@
     }
 
     function initNuke() {
-   // Create and preload audio elements
-   const sirenSound = new Audio('https://www.myinstants.com/media/sounds/nuclear-alarm-siren.mp3');
-   sirenSound.volume = 0.3;
-   
-   const explosionSound = new Audio('https://www.myinstants.com/media/sounds/atomic_bomb-sound_explorer-897730679-1.mp3');
-   explosionSound.volume = 0.3;
-    // Add unlocking function
-    function unlockAudio() {
-        sirenSound.play().then(() => {
-            sirenSound.pause();
-            sirenSound.currentTime = 0;
-        }).catch(() => {});
-        
-        explosionSound.play().then(() => {
-            explosionSound.pause();
-            explosionSound.currentTime = 0;
-        }).catch(() => {});
-        
-        document.removeEventListener('click', unlockAudio);
-    }
+        // Create and preload audio elements
+        const sirenSound = new Audio('https://www.myinstants.com/media/sounds/nuclear-alarm-siren.mp3');
+        sirenSound.volume = 0.3;
 
-    document.addEventListener('click', unlockAudio);
+        const explosionSound = new Audio(
+            'https://www.myinstants.com/media/sounds/atomic_bomb-sound_explorer-897730679-1.mp3');
+        explosionSound.volume = 0.3;
+        // Add unlocking function
+        function unlockAudio() {
+            sirenSound.play().then(() => {
+                sirenSound.pause();
+                sirenSound.currentTime = 0;
+            }).catch(() => {});
 
-    return function triggerNuke() {
-        // Initial warning phase
-        const emergencyBroadcast = document.createElement('div');
-        emergencyBroadcast.style.cssText = `
+            explosionSound.play().then(() => {
+                explosionSound.pause();
+                explosionSound.currentTime = 0;
+            }).catch(() => {});
+
+            document.removeEventListener('click', unlockAudio);
+        }
+
+        document.addEventListener('click', unlockAudio);
+
+        return function triggerNuke() {
+            // Initial warning phase
+            const emergencyBroadcast = document.createElement('div');
+            emergencyBroadcast.style.cssText = `
             position: fixed;
             top: 40%;
             left: 50%;
@@ -2075,24 +2077,24 @@
             opacity: 0;
             transition: opacity 2s;
         `;
-        emergencyBroadcast.innerHTML = `
+            emergencyBroadcast.innerHTML = `
             ⚠️ EMERGENCY BROADCAST SYSTEM ⚠️<br>
             THIS IS NOT A TEST<br>
             <span style="font-size: 24px">Stand by for important information</span>
         `;
-        document.body.appendChild(emergencyBroadcast);
+            document.body.appendChild(emergencyBroadcast);
 
-        // Fade in emergency broadcast
-        setTimeout(() => {
-            emergencyBroadcast.style.opacity = '1';
-            sirenSound.play();
-            sirenSound.loop = true;
-        }, 500);
+            // Fade in emergency broadcast
+            setTimeout(() => {
+                emergencyBroadcast.style.opacity = '1';
+                sirenSound.play();
+                sirenSound.loop = true;
+            }, 500);
 
-        // Add warning text after delay
-        setTimeout(() => {
-            const warning = document.createElement('div');
-            warning.style.cssText = `
+            // Add warning text after delay
+            setTimeout(() => {
+                const warning = document.createElement('div');
+                warning.style.cssText = `
                 position: fixed;
                 top: 60%;
                 left: 50%;
@@ -2105,12 +2107,12 @@
                 text-shadow: 0 0 10px #ff0000;
                 animation: blink 1s infinite;
             `;
-            warning.textContent = '☢️ NUCLEAR LAUNCH DETECTED ☢️';
-            document.body.appendChild(warning);
+                warning.textContent = '☢️ NUCLEAR LAUNCH DETECTED ☢️';
+                document.body.appendChild(warning);
 
-            // Add threat level
-            const threatLevel = document.createElement('div');
-            threatLevel.style.cssText = `
+                // Add threat level
+                const threatLevel = document.createElement('div');
+                threatLevel.style.cssText = `
                 position: fixed;
                 top: 70%;
                 left: 50%;
@@ -2121,13 +2123,13 @@
                 text-align: center;
                 z-index: 10000;
             `;
-            threatLevel.textContent = 'THREAT LEVEL: MAXIMUM';
-            document.body.appendChild(threatLevel);
+                threatLevel.textContent = 'THREAT LEVEL: MAXIMUM';
+                document.body.appendChild(threatLevel);
 
-            // Start countdown
-            let countdown = 30; // Increased countdown time
-            const countdownEl = document.createElement('div');
-            countdownEl.style.cssText = `
+                // Start countdown
+                let countdown = 30; // Increased countdown time
+                const countdownEl = document.createElement('div');
+                countdownEl.style.cssText = `
                 position: fixed;
                 top: 80%;
                 left: 50%;
@@ -2137,51 +2139,52 @@
                 font-weight: bold;
                 z-index: 10000;
             `;
-            document.body.appendChild(countdownEl);
+                document.body.appendChild(countdownEl);
 
-            const countInterval = setInterval(() => {
-                countdown--;
-                countdownEl.textContent = `IMPACT IN: ${countdown} SECONDS`;
-                
-                // Make things more intense in the final 10 seconds
-                if (countdown <= 10) {
-                    countdownEl.style.animation = 'blink 0.5s infinite';
-                }
-                
-                if (countdown <= 0) {
-                    clearInterval(countInterval);
-                }
-            }, 1000);
+                const countInterval = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = `IMPACT IN: ${countdown} SECONDS`;
 
-            // Trigger explosion after countdown
-            setTimeout(() => {
-                // Stop siren and play explosion
-                sirenSound.pause();
-                explosionSound.play();
+                    // Make things more intense in the final 10 seconds
+                    if (countdown <= 10) {
+                        countdownEl.style.animation = 'blink 0.5s infinite';
+                    }
 
-                // Remove all warning elements
-                [emergencyBroadcast, warning, threatLevel, countdownEl].forEach(el => el.remove());
+                    if (countdown <= 0) {
+                        clearInterval(countInterval);
+                    }
+                }, 1000);
 
-                // Create flash overlay
-                const overlay = document.createElement('div');
-                overlay.className = 'nuke-overlay nuke-flash';
-                document.body.appendChild(overlay);
-
-                // Create multiple shockwaves
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => {
-                        const shockwave = document.createElement('div');
-                        shockwave.className = 'shockwave';
-                        document.body.appendChild(shockwave);
-                        
-                        setTimeout(() => shockwave.remove(), 2000);
-                    }, i * 500);
-                }
-
-                // Create aftermath effects
+                // Trigger explosion after countdown
                 setTimeout(() => {
-                    const aftermath = document.createElement('div');
-                    aftermath.style.cssText = `
+                    // Stop siren and play explosion
+                    sirenSound.pause();
+                    explosionSound.play();
+
+                    // Remove all warning elements
+                    [emergencyBroadcast, warning, threatLevel, countdownEl].forEach(el => el
+                        .remove());
+
+                    // Create flash overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'nuke-overlay nuke-flash';
+                    document.body.appendChild(overlay);
+
+                    // Create multiple shockwaves
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            const shockwave = document.createElement('div');
+                            shockwave.className = 'shockwave';
+                            document.body.appendChild(shockwave);
+
+                            setTimeout(() => shockwave.remove(), 2000);
+                        }, i * 500);
+                    }
+
+                    // Create aftermath effects
+                    setTimeout(() => {
+                        const aftermath = document.createElement('div');
+                        aftermath.style.cssText = `
                         position: fixed;
                         top: 0;
                         left: 0;
@@ -2191,25 +2194,45 @@
                         z-index: 9999;
                         transition: opacity 5s;
                     `;
-                    document.body.appendChild(aftermath);
+                        document.body.appendChild(aftermath);
 
-                    // Fade out aftermath gradually
+                        // Fade out aftermath gradually
+                        setTimeout(() => {
+                            aftermath.style.opacity = '0';
+                            setTimeout(() => aftermath.remove(), 5000);
+                        }, 3000);
+                    }, 2000);
+
+                    // Clean up final overlay
                     setTimeout(() => {
-                        aftermath.style.opacity = '0';
-                        setTimeout(() => aftermath.remove(), 5000);
-                    }, 3000);
-                }, 2000);
-
-                // Clean up final overlay
-                setTimeout(() => {
-                    overlay.remove();
-                }, 8000);
-            }, countdown * 1000);
-        }, 3000);
-    };
-}
+                        overlay.remove();
+                    }, 8000);
+                }, countdown * 1000);
+            }, 3000);
+        };
+    }
     // Initialize the nuke function
     const triggerNuke = initNuke();
+
+    function createStarField() {
+        // Remove any existing stars
+        document.querySelectorAll('.star').forEach(star => star.remove());
+
+        // Create 200 stars
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+
+            // Randomize starting position
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+
+            // Randomize animation duration between 0.5 and 2 seconds
+            star.style.animationDuration = `${0.5 + Math.random() * 1.5}s`;
+
+            document.body.appendChild(star);
+        }
+    }
 
     function initEasterEggs() {
         const triggers = {
@@ -2219,7 +2242,6 @@
             'ANTIGRAVITY': 'antigravity',
             'AUSTRALIAN MODE': 'australian-mode',
             'DISCO': 'disco-mode',
-            'WARP SPEED': 'warp-speed',
             'HACKER MODE': 'hacker-mode',
             'DO A BARREL ROLL': 'do-barrel-roll',
             'NUKE': () => triggerNuke()
