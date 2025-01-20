@@ -1750,18 +1750,18 @@
 
             if (installtime) {
                 listItems.push(format === 'bbcode' ?
-                    `Installation time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]` :
+                    `Installation Time: [b]${installtime}[/b] on [b]${settings.systemSpecs}[/b]` :
                     format === 'discord' ?
-                    `Installation time: **${installtime}** on **${settings.systemSpecs}**` :
-                    `Installation time: ${installtime} on ${settings.systemSpecs}`);
+                    `Installation Time: **${installtime}** on **${settings.systemSpecs}**` :
+                    `Installation Time: ${installtime} on ${settings.systemSpecs}`);
             }
 
             if (settings.requiredRam) {
                 listItems.push(format === 'bbcode' ?
-                    `RAM required: [b]${settings.requiredRam}[/b] during installation` :
+                    `RAM Required: [b]${settings.requiredRam}[/b] during installation` :
                     format === 'discord' ?
-                    `RAM required: **${settings.requiredRam}** during installation` :
-                    `RAM required: ${settings.requiredRam} during installation`);
+                    `RAM Required: **${settings.requiredRam}** during installation` :
+                    `RAM Required: ${settings.requiredRam} during installation`);
             }
 
             // Add list items with proper formatting
